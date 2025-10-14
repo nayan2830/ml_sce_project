@@ -236,7 +236,7 @@ if uploaded_file is not None:
     st.markdown("""
         **Interpretation: Feature Correlation**
         * **High Feature-Target Correlation:** `cdi`, `mmi`, and `sig` show the strongest positive correlation with the target variable (`alert`), confirming their high predictive power for a 'Yellow' alert (1).
-        * **Feature-Feature Multicollinearity:** `cdi` and `mmi` are highly correlated with each other ($\approx 0.90$), which is expected given they measure similar concepts (shaking intensity).
+        * **Feature-Feature Multicollinearity:** `cdi` and `mmi` are highly correlated with each other ($\approx 0.90$), which is expected as both measure similar concepts (shaking intensity).
         * **Low/Negative Feature-Target Correlation:** `depth` shows a slight negative correlation with the target, meaning deeper earthquakes are slightly less likely to trigger a 'Yellow' alert.
     """)
     st.markdown("---")
@@ -263,9 +263,10 @@ if uploaded_file is not None:
         
         # Calculate performance metrics
         accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
+        # FIX: Explicitly set average='binary' and pos_label=1 to resolve ValueError
+        precision = precision_score(y_test, y_pred, average='binary', pos_label=1)
+        recall = recall_score(y_test, y_pred, average='binary', pos_label=1)
+        f1 = f1_score(y_test, y_pred, average='binary', pos_label=1)
         
         # Predict probabilities for AUC
         if hasattr(model, "predict_proba"):
@@ -329,7 +330,8 @@ if uploaded_file is not None:
     
     # Calculate Tuned Performance Metrics
     acc_tuned = accuracy_score(y_test, y_pred_tuned)
-    f1_tuned = f1_score(y_test, y_pred_tuned)
+    # FIX: Explicitly set average='binary' and pos_label=1 for consistency
+    f1_tuned = f1_score(y_test, y_pred_tuned, average='binary', pos_label=1)
     
     # 4.3 Tuned vs untuned models comparison with their learning curve
     st.subheader("4.3. Tuned vs. Untuned Random Forest Learning Curve")
@@ -342,7 +344,13 @@ if uploaded_file is not None:
     # Untuned Curve
     plot_learning_curve(rfc_untuned, "Untuned Random Forest", X, y, 
                         cv=5, n_jobs=-1, ax=axes_comp[0], scoring='f1')
-    axes_comp[0].text(0.5, 0.1, f"F1 Score (Test): {f1_score(y_test, rfc_untuned.fit(X_train, y_train).predict(X_test)):.4f}", 
+    
+    # Calculate untuned F1 score with explicit parameters for display
+    rfc_untuned.fit(X_train, y_train) # Refit untuned model
+    y_pred_untuned = rfc_untuned.predict(X_test)
+    f1_untuned = f1_score(y_test, y_pred_untuned, average='binary', pos_label=1) # FIX: Applied pos_label
+    
+    axes_comp[0].text(0.5, 0.1, f"F1 Score (Test): {f1_untuned:.4f}", 
                      transform=axes_comp[0].transAxes, fontsize=10, ha='center', bbox=dict(facecolor='white', alpha=0.7))
 
     # Tuned Curve
@@ -357,7 +365,7 @@ if uploaded_file is not None:
     
     st.markdown(f"""
         **Comparison (F1 Score):**
-        * **Untuned RFC:** F1 Score $\approx {f1_score(y_test, rfc_untuned.predict(X_test)):.4f}$
+        * **Untuned RFC:** F1 Score $\approx {f1_untuned:.4f}$
         * **Tuned RFC:** F1 Score $\approx {f1_tuned:.4f}$
         
         **Interpretation: Learning Curve Analysis**
@@ -406,9 +414,10 @@ if uploaded_file is not None:
     # Calculate full metrics for the final Tuned RFC
     final_results = {
         'Accuracy': accuracy_score(y_test, y_pred_tuned),
-        'Precision': precision_score(y_test, y_pred_tuned),
-        'Recall': recall_score(y_test, y_pred_tuned),
-        'F1 Score': f1_score(y_test, y_pred_tuned),
+        # FIX: Explicitly set average='binary' and pos_label=1
+        'Precision': precision_score(y_test, y_pred_tuned, average='binary', pos_label=1),
+        'Recall': recall_score(y_test, y_pred_tuned, average='binary', pos_label=1),
+        'F1 Score': f1_score(y_test, y_pred_tuned, average='binary', pos_label=1),
     }
 
     metrics_df = pd.DataFrame(final_results, index=['Tuned Random Forest']).T
