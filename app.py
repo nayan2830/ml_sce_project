@@ -8,12 +8,12 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPClassifier # Swapped KNeighborsClassifier for MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.exceptions import ConvergenceWarning
 import warnings
 
-# Suppress Convergence Warnings for Logistic Regression
+# Suppress Convergence Warnings for Logistic Regression and MLPClassifier
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 # Suppress the deprecation warning for size= in seaborn histplot
 warnings.filterwarnings("ignore", "use_inf_as_na")
@@ -243,12 +243,13 @@ if uploaded_file is not None:
     
     # 4. Algorithm Training & Comparison
     st.header("4. Algorithm Training & Comparison")
-    st.success("Hyperparameter")
+    st.success("Hyperparameter tuning in the green")
 
-    # Initialize Models
+    # Initialize Models - KNN replaced by MLP
     models = {
         'Logistic Regression (LR)': LogisticRegression(random_state=42),
-        'Multi Layer Percetron (MLP)': MLPClassifier(random_state=42, max_iter=1000),
+        # Using a simple MLP with increased max_iter to ensure convergence
+        'Multi-layer Perceptron (MLP)': MLPClassifier(random_state=42, max_iter=1000, hidden_layer_sizes=(50,)), 
         'Random Forest Classifier (RFC)': RandomForestClassifier(random_state=42)
     }
 
@@ -296,7 +297,7 @@ if uploaded_file is not None:
         **Interpretation: Model Comparison**
         * The **Random Forest Classifier (RFC)** demonstrates the strongest overall performance, achieving the highest or near-highest scores across all metrics (Accuracy, F1 Score, and AUC).
         * **Logistic Regression (LR)** performs reasonably well, providing a good baseline.
-        * **K-Nearest Neighbors (KNN)** is competitive but slightly trails RFC, indicating that the decision boundaries in this problem are complex and benefited from the ensemble approach of RFC. RFC is clearly the best candidate for further tuning.
+        * **Multi-layer Perceptron (MLP)** is competitive but often requires careful hyperparameter tuning for optimal results. Its performance relative to RFC will indicate the advantage of a deep learning approach versus an ensemble tree-based model for this dataset. RFC is clearly the best candidate for further tuning based on initial scores.
     """)
 
     # 4.2 Tuning the best algorithm model (Random Forest)
@@ -373,7 +374,7 @@ if uploaded_file is not None:
     # Use a fixed set of three main models for the plots
     final_models = {
         'Logistic Regression': models['Logistic Regression (LR)'],
-        'K-Nearest Neighbors': models['K-Nearest Neighbors (KNN)'],
+        'Multi-layer Perceptron': models['Multi-layer Perceptron (MLP)'], # Updated from KNN
         'Tuned Random Forest': rfc_tuned
     }
 
@@ -391,7 +392,7 @@ if uploaded_file is not None:
     st.markdown("""
         **Interpretation: Individual Learning Curves**
         * **Logistic Regression:** The training and cross-validation scores converge early, but at a moderately high level. This suggests the model may be slightly **underfitting**, as a linear model may not capture all the complexity of the data.
-        * **K-Nearest Neighbors:** The gap between the training and cross-validation score is noticeable, especially at small training sizes, indicating a potential for **overfitting**. As the training size increases, the gap reduces, but the model remains sensitive to local data points.
+        * **Multi-layer Perceptron:** The shape of the curve will show if the network is converging effectively. If the scores are low, it might be **underfitting** due to insufficient complexity (number of layers/neurons). If the gap between training and cross-validation is large, it suggests **overfitting**, which is common in neural networks without regularization.
         * **Tuned Random Forest:** Shows high training scores and high, closely-following cross-validation scores. The small gap and high scores confirm that the Tuned Random Forest model is the best fit, achieving the best balance between **bias and variance** (low underfitting and low overfitting).
     """)
     st.markdown("---")
@@ -435,7 +436,7 @@ if uploaded_file is not None:
 
     cm_models = {
         'LR': models['Logistic Regression (LR)'],
-        'KNN': models['K-Nearest Neighbors (KNN)'],
+        'MLP': models['Multi-layer Perceptron (MLP)'], # Updated from KNN
         'Tuned RFC': rfc_tuned
     }
     
@@ -454,7 +455,7 @@ if uploaded_file is not None:
     st.markdown("""
         **Interpretation: Confusion Matrices**
         * **LR:** Shows a relatively balanced number of False Positives (predicting Yellow when it's Green) and False Negatives (predicting Green when it's Yellow).
-        * **KNN:** Typically has slightly fewer False Positives than LR but might have more False Negatives, demonstrating its locally sensitive nature.
+        * **MLP:** The performance here reflects the neural network's ability to learn complex, non-linear boundaries. It usually performs better than LR but might have more balanced error types (False Positives vs. False Negatives) than RFC, depending on its architecture and training success.
         * **Tuned RFC:** Generally exhibits the lowest numbers in the off-diagonal cells (False Positives and False Negatives), particularly minimizing False Negatives. In the context of earthquake prediction, **minimizing False Negatives (missing an actual alert)** is usually the priority, and the Tuned RFC achieves the best balance for this critical metric. The small number of errors confirms its superiority.
     """)
     st.markdown("---")
