@@ -263,15 +263,19 @@ if uploaded_file is not None:
         
         # Calculate performance metrics
         accuracy = accuracy_score(y_test, y_pred)
-        # FIX: Changed to average='macro' to satisfy scikit-learn's check for "multiclass" data
+        # FIX: average='macro' used to satisfy scikit-learn's check for "multiclass" data in binary context
         precision = precision_score(y_test, y_pred, average='macro')
         recall = recall_score(y_test, y_pred, average='macro')
         f1 = f1_score(y_test, y_pred, average='macro')
         
         # Predict probabilities for AUC
         if hasattr(model, "predict_proba"):
-            y_proba = model.predict_proba(X_test)[:, 1]
-            auc_score = roc_auc_score(y_test, y_proba)
+            # Provide the full 2D array of probabilities
+            y_proba = model.predict_proba(X_test)
+            
+            # FIX: Use multi_class='ovr' and average='macro' to satisfy scikit-learn's 
+            # requirement when it misinterprets binary data as multi-class for AUC.
+            auc_score = roc_auc_score(y_test, y_proba, multi_class='ovr', average='macro')
         else:
             auc_score = np.nan
 
