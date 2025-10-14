@@ -243,7 +243,7 @@ if uploaded_file is not None:
     
     # 4. Algorithm Training & Comparison
     st.header("4. Algorithm Training & Comparison")
-    st.success("Hyperparameter tuning in the green")
+    st.success("Hyperparameter tuning")
 
     # Initialize Models - KNN replaced by MLP
     models = {
