@@ -346,8 +346,9 @@ if uploaded_file is not None:
     fig_comp, axes_comp = plt.subplots(1, 2, figsize=(16, 6))
     
     # Untuned Curve
+    # Changed scoring to 'accuracy' and removed n_jobs=-1 for stability
     plot_learning_curve(rfc_untuned, "Untuned Random Forest", X, y, 
-                        cv=5, n_jobs=-1, ax=axes_comp[0], scoring='f1')
+                        cv=5, n_jobs=None, ax=axes_comp[0], scoring='accuracy') 
     
     # Calculate untuned F1 score with explicit parameters for display
     rfc_untuned.fit(X_train, y_train) # Refit untuned model
@@ -355,27 +356,26 @@ if uploaded_file is not None:
     # FIX: Changed to average='macro'
     f1_untuned = f1_score(y_test, y_pred_untuned, average='macro')
     
-    axes_comp[0].text(0.5, 0.1, f"F1 Score (Test): {f1_untuned:.4f}", 
-                     transform=axes_comp[0].transAxes, fontsize=10, ha='center', bbox=dict(facecolor='white', alpha=0.7))
-
+    # Removed F1 text annotation since the plot is now for Accuracy
+    
     # Tuned Curve
+    # Changed scoring to 'accuracy' and removed n_jobs=-1 for stability
     plot_learning_curve(rfc_tuned, "Tuned Random Forest", X, y, 
-                        cv=5, n_jobs=-1, ax=axes_comp[1], scoring='f1')
-    axes_comp[1].text(0.5, 0.1, f"F1 Score (Test): {f1_tuned:.4f}", 
-                     transform=axes_comp[1].transAxes, fontsize=10, ha='center', bbox=dict(facecolor='white', alpha=0.7))
+                        cv=5, n_jobs=None, ax=axes_comp[1], scoring='accuracy')
+    # Removed F1 text annotation since the plot is now for Accuracy
 
     plt.tight_layout()
     st.pyplot(fig_comp)
     plt.close(fig_comp)
     
     st.markdown(f"""
-        **Comparison (F1 Score):**
-        * **Untuned RFC:** F1 Score $\approx {f1_untuned:.4f}$
-        * **Tuned RFC:** F1 Score $\approx {f1_tuned:.4f}$
+        **Comparison (F1 Score on Test Set):**
+        * **Untuned RFC:** F1 Score $\approx {f1_untuned:.4f}$ (Performance Metric)
+        * **Tuned RFC:** F1 Score $\approx {f1_tuned:.4f}$ (Performance Metric)
         
-        **Interpretation: Learning Curve Analysis**
-        * **Tuned vs. Untuned:** The tuned model (right) often shows a slightly higher cross-validation score (green line) at larger training sizes and/or a slightly smaller gap between the training (red) and cross-validation (green) scores. This indicates that tuning successfully improved the model's **generalization ability** and reduced overfitting/underfitting slightly compared to the default parameters, leading to a small but valuable increase in the F1 score on the test set.
-        * **General Trend:** Both curves show both scores converging towards a high value, suggesting the models are well-suited for the dataset, and gathering more data would only lead to marginal gains.
+        **Interpretation: Learning Curve Analysis (Accuracy Score)**
+        * **Tuned vs. Untuned:** These curves plot the **Accuracy** score against training size. The tuned model (right) often shows a slightly higher cross-validation score (green line) at larger training sizes and/or a slightly smaller gap between the training (red) and cross-validation (green) scores. This visual evidence suggests that tuning successfully improved the model's **generalization ability** and reduced the bias-variance trade-off compared to the default parameters.
+        * **General Trend:** Both curves show both scores converging toward a high value, suggesting the models are well-suited for the dataset, and gathering more data would only lead to marginal gains.
     """)
     st.markdown("---")
 
@@ -395,8 +395,9 @@ if uploaded_file is not None:
     axes_lc = axes_lc.flatten()
     
     for i, (name, model) in enumerate(final_models.items()):
+        # Changed scoring to 'accuracy' and removed n_jobs=-1 for stability
         plot_learning_curve(model, f'Learning Curve: {name}', X, y, 
-                            cv=5, n_jobs=-1, ax=axes_lc[i], scoring='f1', model_name=name)
+                            cv=5, n_jobs=None, ax=axes_lc[i], scoring='accuracy', model_name=name)
 
     plt.tight_layout()
     st.pyplot(fig_lc)
@@ -404,7 +405,7 @@ if uploaded_file is not None:
     
     st.markdown("""
         **Interpretation: Individual Learning Curves**
-        * **Logistic Regression:** The training and cross-validation scores converge early, but at a moderately high level. This suggests the model may be slightly **underfitting**, as a linear model may not capture all the complexity of the data.
+        * **Logistic Regression:** The training and cross-validation scores (Accuracy) converge early, but at a moderately high level. This suggests the model may be slightly **underfitting**, as a linear model may not capture all the complexity of the data.
         * **Multi-layer Perceptron:** The shape of the curve will show if the network is converging effectively. If the scores are low, it might be **underfitting** due to insufficient complexity (number of layers/neurons). If the gap between training and cross-validation is large, it suggests **overfitting**, which is common in neural networks without regularization.
         * **Tuned Random Forest:** Shows high training scores and high, closely-following cross-validation scores. The small gap and high scores confirm that the Tuned Random Forest model is the best fit, achieving the best balance between **bias and variance** (low underfitting and low overfitting).
     """)
