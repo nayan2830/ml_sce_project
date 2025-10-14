@@ -236,7 +236,7 @@ if uploaded_file is not None:
     st.markdown("""
         **Interpretation: Feature Correlation**
         * **High Feature-Target Correlation:** `cdi`, `mmi`, and `sig` show the strongest positive correlation with the target variable (`alert`), confirming their high predictive power for a 'Yellow' alert (1).
-        * **Feature-Feature Multicollinearity:** `cdi` and `mmi` are highly correlated with each other ($\approx 0.90$), which is expected as both measure similar concepts (shaking intensity).
+        * **Feature-Feature Multicollinearity:** `cdi` and `mmi` are highly correlated with each other (correlation coefficient of approximately $0.90$), which is expected as both measure similar concepts (shaking intensity).
         * **Low/Negative Feature-Target Correlation:** `depth` shows a slight negative correlation with the target, meaning deeper earthquakes are slightly less likely to trigger a 'Yellow' alert.
     """)
     st.markdown("---")
