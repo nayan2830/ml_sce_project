@@ -243,12 +243,12 @@ if uploaded_file is not None:
     
     # 4. Algorithm Training & Comparison
     st.header("4. Algorithm Training & Comparison")
-    st.success("Hyperparameter tuning in the green")
+    st.success("Hyperparameter")
 
     # Initialize Models
     models = {
         'Logistic Regression (LR)': LogisticRegression(random_state=42),
-        'K-Nearest Neighbors (KNN)': KNeighborsClassifier(n_neighbors=5),
+        'Multi Layer Percetron (MLP)': MLPClassifier(random_state=42, max_iter=1000),
         'Random Forest Classifier (RFC)': RandomForestClassifier(random_state=42)
     }
 
