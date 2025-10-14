@@ -155,7 +155,7 @@ if uploaded_file is not None:
     
     st.markdown("""
         **Interpretation: Target Variable Distribution**
-        * This count plot confirms that the dataset is **balanced**, with an approximately equal number of observations for the 'Green' (0) and 'Yellow' (1) alert categories.
+        * This count plot confirms that the dataset is **balanced**, with an **approximately** equal number of observations for the 'Green' (0) and 'Yellow' (1) alert categories.
         * This balance is crucial as it prevents the models from developing a bias toward the majority class, leading to more reliable performance metrics.
     """)
     st.markdown("---")
@@ -236,7 +236,7 @@ if uploaded_file is not None:
     st.markdown("""
         **Interpretation: Feature Correlation**
         * **High Feature-Target Correlation:** `cdi`, `mmi`, and `sig` show the strongest positive correlation with the target variable (`alert`), confirming their high predictive power for a 'Yellow' alert (1).
-        * **Feature-Feature Multicollinearity:** `cdi` and `mmi` are highly correlated with each other (correlation coefficient of approximately $0.90$), which is expected as both measure similar concepts (shaking intensity).
+        * **Feature-Feature Multicollinearity:** `cdi` and `mmi` are highly correlated with each other (correlation coefficient of **approximately** $0.90$), which is expected as both measure similar concepts (shaking intensity).
         * **Low/Negative Feature-Target Correlation:** `depth` shows a slight negative correlation with the target, meaning deeper earthquakes are slightly less likely to trigger a 'Yellow' alert.
     """)
     st.markdown("---")
@@ -433,7 +433,7 @@ if uploaded_file is not None:
     
     st.markdown(f"""
         **Interpretation: Tuned Random Forest Performance**
-        * **Accuracy ({final_results['Accuracy']:.4f}):** The model correctly predicts the alert category for approximately {final_results['Accuracy']*100:.2f}% of the test cases.
+        * **Accuracy ({final_results['Accuracy']:.4f}):** The model correctly predicts the alert category for **approximately** {final_results['Accuracy']*100:.2f}% of the test cases.
         * **Precision ({final_results['Precision']:.4f}):** When the model predicts a 'Yellow' alert (1), it is correct {final_results['Precision']*100:.2f}% of the time (macro average of both classes).
         * **Recall ({final_results['Recall']:.4f}):** The model successfully identified {final_results['Recall']*100:.2f}% of all actual 'Yellow' alert (1) cases (macro average of both classes).
         * **F1 Score ({final_results['F1 Score']:.4f}):** This is the harmonic mean of Precision and Recall, providing a balanced measure of the model's performance, which is excellent.
