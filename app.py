@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import MLPClassifier # Swapped KNeighborsClassifier for MLPClassifier
+from sklearn.neural_network import MLPClassifier 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.exceptions import ConvergenceWarning
 import warnings
@@ -263,10 +263,10 @@ if uploaded_file is not None:
         
         # Calculate performance metrics
         accuracy = accuracy_score(y_test, y_pred)
-        # FIX: Explicitly set average='binary' and pos_label=1 to resolve ValueError
-        precision = precision_score(y_test, y_pred, average='binary', pos_label=1)
-        recall = recall_score(y_test, y_pred, average='binary', pos_label=1)
-        f1 = f1_score(y_test, y_pred, average='binary', pos_label=1)
+        # FIX: Changed to average='macro' to satisfy scikit-learn's check for "multiclass" data
+        precision = precision_score(y_test, y_pred, average='macro')
+        recall = recall_score(y_test, y_pred, average='macro')
+        f1 = f1_score(y_test, y_pred, average='macro')
         
         # Predict probabilities for AUC
         if hasattr(model, "predict_proba"):
@@ -330,8 +330,8 @@ if uploaded_file is not None:
     
     # Calculate Tuned Performance Metrics
     acc_tuned = accuracy_score(y_test, y_pred_tuned)
-    # FIX: Explicitly set average='binary' and pos_label=1 for consistency
-    f1_tuned = f1_score(y_test, y_pred_tuned, average='binary', pos_label=1)
+    # FIX: Changed to average='macro'
+    f1_tuned = f1_score(y_test, y_pred_tuned, average='macro')
     
     # 4.3 Tuned vs untuned models comparison with their learning curve
     st.subheader("4.3. Tuned vs. Untuned Random Forest Learning Curve")
@@ -348,7 +348,8 @@ if uploaded_file is not None:
     # Calculate untuned F1 score with explicit parameters for display
     rfc_untuned.fit(X_train, y_train) # Refit untuned model
     y_pred_untuned = rfc_untuned.predict(X_test)
-    f1_untuned = f1_score(y_test, y_pred_untuned, average='binary', pos_label=1) # FIX: Applied pos_label
+    # FIX: Changed to average='macro'
+    f1_untuned = f1_score(y_test, y_pred_untuned, average='macro')
     
     axes_comp[0].text(0.5, 0.1, f"F1 Score (Test): {f1_untuned:.4f}", 
                      transform=axes_comp[0].transAxes, fontsize=10, ha='center', bbox=dict(facecolor='white', alpha=0.7))
@@ -382,7 +383,7 @@ if uploaded_file is not None:
     # Use a fixed set of three main models for the plots
     final_models = {
         'Logistic Regression': models['Logistic Regression (LR)'],
-        'Multi-layer Perceptron': models['Multi-layer Perceptron (MLP)'], # Updated from KNN
+        'Multi-layer Perceptron': models['Multi-layer Perceptron (MLP)'], 
         'Tuned Random Forest': rfc_tuned
     }
 
@@ -414,10 +415,10 @@ if uploaded_file is not None:
     # Calculate full metrics for the final Tuned RFC
     final_results = {
         'Accuracy': accuracy_score(y_test, y_pred_tuned),
-        # FIX: Explicitly set average='binary' and pos_label=1
-        'Precision': precision_score(y_test, y_pred_tuned, average='binary', pos_label=1),
-        'Recall': recall_score(y_test, y_pred_tuned, average='binary', pos_label=1),
-        'F1 Score': f1_score(y_test, y_pred_tuned, average='binary', pos_label=1),
+        # FIX: Changed to average='macro'
+        'Precision': precision_score(y_test, y_pred_tuned, average='macro'),
+        'Recall': recall_score(y_test, y_pred_tuned, average='macro'),
+        'F1 Score': f1_score(y_test, y_pred_tuned, average='macro'),
     }
 
     metrics_df = pd.DataFrame(final_results, index=['Tuned Random Forest']).T
@@ -427,8 +428,8 @@ if uploaded_file is not None:
     st.markdown(f"""
         **Interpretation: Tuned Random Forest Performance**
         * **Accuracy ({final_results['Accuracy']:.4f}):** The model correctly predicts the alert category for approximately {final_results['Accuracy']*100:.2f}% of the test cases.
-        * **Precision ({final_results['Precision']:.4f}):** When the model predicts a 'Yellow' alert (1), it is correct {final_results['Precision']*100:.2f}% of the time. This measures the quality of the positive prediction.
-        * **Recall ({final_results['Recall']:.4f}):** The model successfully identified {final_results['Recall']*100:.2f}% of all actual 'Yellow' alert (1) cases. This measures the completeness of the positive prediction.
+        * **Precision ({final_results['Precision']:.4f}):** When the model predicts a 'Yellow' alert (1), it is correct {final_results['Precision']*100:.2f}% of the time (macro average of both classes).
+        * **Recall ({final_results['Recall']:.4f}):** The model successfully identified {final_results['Recall']*100:.2f}% of all actual 'Yellow' alert (1) cases (macro average of both classes).
         * **F1 Score ({final_results['F1 Score']:.4f}):** This is the harmonic mean of Precision and Recall, providing a balanced measure of the model's performance, which is excellent.
     """)
     st.markdown("---")
@@ -445,7 +446,7 @@ if uploaded_file is not None:
 
     cm_models = {
         'LR': models['Logistic Regression (LR)'],
-        'MLP': models['Multi-layer Perceptron (MLP)'], # Updated from KNN
+        'MLP': models['Multi-layer Perceptron (MLP)'], 
         'Tuned RFC': rfc_tuned
     }
     
