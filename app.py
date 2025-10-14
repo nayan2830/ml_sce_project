@@ -342,6 +342,8 @@ if uploaded_file is not None:
     
     # Retrain Untuned Model for clean comparison
     rfc_untuned = RandomForestClassifier(random_state=42)
+    # Note: We must fit this untuned model here for use in the Confusion Matrix section below
+    rfc_untuned.fit(X_train, y_train) 
     
     fig_comp, axes_comp = plt.subplots(1, 2, figsize=(16, 6))
     
@@ -351,7 +353,6 @@ if uploaded_file is not None:
                         cv=5, n_jobs=None, ax=axes_comp[0], scoring='accuracy') 
     
     # Calculate untuned F1 score with explicit parameters for display
-    rfc_untuned.fit(X_train, y_train) # Refit untuned model
     y_pred_untuned = rfc_untuned.predict(X_test)
     # FIX: Changed to average='macro'
     f1_untuned = f1_score(y_test, y_pred_untuned, average='macro')
@@ -446,13 +447,16 @@ if uploaded_file is not None:
     # 7.1. Error Analysis: Confusion Matrices
     st.subheader("7.1. Error Analysis: Confusion Matrices")
 
-    fig_cm, axes_cm = plt.subplots(1, 3, figsize=(21, 6))
+    # Updated subplot to 1 row, 4 columns
+    fig_cm, axes_cm = plt.subplots(1, 4, figsize=(28, 6))
     axes_cm = axes_cm.flatten()
 
+    # Updated model list to include Untuned RFC
     cm_models = {
         'LR': models['Logistic Regression (LR)'],
         'MLP': models['Multi-layer Perceptron (MLP)'], 
-        'Tuned RFC': rfc_tuned
+        'RFC (Untuned)': rfc_untuned,
+        'RFC (Tuned)': rfc_tuned
     }
     
     for i, (name, model) in enumerate(cm_models.items()):
@@ -471,7 +475,8 @@ if uploaded_file is not None:
         **Interpretation: Confusion Matrices**
         * **LR:** Shows a relatively balanced number of False Positives (predicting Yellow when it's Green) and False Negatives (predicting Green when it's Yellow).
         * **MLP:** The performance here reflects the neural network's ability to learn complex, non-linear boundaries. It usually performs better than LR but might have more balanced error types (False Positives vs. False Negatives) than RFC, depending on its architecture and training success.
-        * **Tuned RFC:** Generally exhibits the lowest numbers in the off-diagonal cells (False Positives and False Negatives), particularly minimizing False Negatives. In the context of earthquake prediction, **minimizing False Negatives (missing an actual alert)** is usually the priority, and the Tuned RFC achieves the best balance for this critical metric. The small number of errors confirms its superiority.
+        * **RFC (Untuned):** This baseline tree model often performs well but may have slightly higher False Positives or False Negatives compared to the tuned version, showing how default parameters can sometimes lead to slight imbalances in error types.
+        * **RFC (Tuned):** Generally exhibits the lowest numbers in the off-diagonal cells (False Positives and False Negatives), particularly minimizing False Negatives. In the context of earthquake prediction, **minimizing False Negatives (missing an actual alert)** is usually the priority, and the Tuned RFC achieves the best balance for this critical metric. The small number of errors confirms its superiority.
     """)
     st.markdown("---")
     
